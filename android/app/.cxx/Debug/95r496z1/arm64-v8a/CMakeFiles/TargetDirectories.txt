@@ -1,0 +1,2 @@
+C:/Users/shima/OneDrive/Documents/flutter/legaryan_kare/android/app/.cxx/Debug/95r496z1/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/shima/OneDrive/Documents/flutter/legaryan_kare/android/app/.cxx/Debug/95r496z1/arm64-v8a/CMakeFiles/rebuild_cache.dir
