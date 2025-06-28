@@ -1,65 +1,44 @@
-# ───────────────────────────────────────────────────────────────────────────────
-#  Codemagic configuration for Harikar – iOS Release build
-# ───────────────────────────────────────────────────────────────────────────────
 workflows:
   ios-release:
     name: iOS Release
     max_build_duration: 60
 
     environment:
-      flutter: stable          # Dart 3.3.x today; matches your pubspec SDK range
-      xcode: latest            # Codemagic’s latest Xcode (17.x at the time of writing)
+      flutter: stable
+      xcode: latest
 
-    triggering:                # Build automatically on every push to main
+    triggering:
       events:
         - push
       branch_patterns:
         - pattern: main
           include: true
 
-    #
-    # ─── S C R I P T S ────────────────────────────────────────────────────────
-    #
     scripts:
-
-      # 1 ─ Install Dart/Flutter packages
-      - name: Flutter pub get
+      - name: Install dependencies
         script: flutter pub get
 
-      # 2 ─ Make sure CocoaPods repo is up to date (fixes most iOS deps errors)
-      - name: Pod install
+      - name: Install CocoaPods
         script: |
           cd ios
           pod install --repo-update
           cd ..
 
-      # 3 ─ Build the signed IPA
       - name: Build IPA
         script: |
           flutter build ipa --release \
             --export-options-plist=/Users/builder/export_options.plist
 
-    #
-    # ─── A R T I F A C T S ────────────────────────────────────────────────────
-    #
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/archive/*.xcarchive
 
-    #
-    # ─── P U B L I S H I N G  (email download link) ──────────────────────────
-    #
     publishing:
       email:
         recipients:
           - heama.soft@gmail.com
 
-    #
-    # ─── C O D E  S I G N I N G  (AUTOMATIC) ─────────────────────────────────
-    #
-    # Fill in the placeholders below with your Apple Developer Team ID
-    # and your final bundle identifier (e.g. com.heamasoft.hrikar):
     code_signing:
       automatic:
-        apple_team: YOUR_TEAM_ID_HERE
-        bundle_identifier: com.example.harikarl   # ← change to your Bundle ID
+        apple_team: P4XSL5RZ3H
+        bundle_identifier: com.example.legaryanKare
