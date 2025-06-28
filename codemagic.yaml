@@ -1,0 +1,23 @@
+workflows:
+  ios-release:
+    name: iOS Release Build
+    max_build_duration: 60
+    environment:
+      flutter: stable     # Dart 3.3.x (compatible with your SDK constraint)
+      xcode: latest
+    scripts:
+      - name: Install Flutter dependencies
+        script: flutter pub get
+
+      - name: Set iOS deployment target and install CocoaPods
+        script: |
+          cd ios
+          echo "platform :ios, '12.0'" > Podfile
+          pod install --repo-update
+          cd ..
+
+      - name: Build iOS .ipa
+        script: flutter build ipa --release --no-codesign
+
+    artifacts:
+      - build/ios/ipa/*.ipa

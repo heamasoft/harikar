@@ -1,12 +1,12 @@
 name: Harikar
 description: "A new Flutter project for looking for work."
-publish_to: 'none'          # Prevent accidental publishing
+publish_to: "none"        # Prevent accidental publishing
 
 # Version and build number
 version: 1.0.1+4
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'     # ← changed: works with Codemagic stable
+  sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
   flutter:
