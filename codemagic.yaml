@@ -1,19 +1,23 @@
-# ───────────── Code Signing (Automatic) ─────────────
+# ────────── 1. Automatic code-signing (top-level) ──────────
 code_signing:
   automatic:
     apple_team: P4XSL5RZ3H
     bundle_identifier: com.example.legaryanKare
 
-# ───────────── Workflows ─────────────
+# ────────── 2. Workflows ───────────────────────────────────
 workflows:
   ios-release:
     name: iOS Release
     max_build_duration: 60
 
     environment:
-      flutter: stable
-      xcode: latest
-      cocoapods: default
+      flutter: stable        # uses latest stable Flutter SDK
+      xcode:   latest
+      # these vars are picked up from the secure env-vars page
+      vars:
+        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted
+        APP_STORE_CONNECT_KEY_ID:      Encrypted
+        APP_STORE_CONNECT_ISSUER_ID:   Encrypted
 
     triggering:
       events:
@@ -23,7 +27,7 @@ workflows:
           include: true
 
     scripts:
-      - name: Install dependencies
+      - name: Get Flutter packages
         script: flutter pub get
 
       - name: Install CocoaPods
@@ -41,7 +45,8 @@ workflows:
 
     publishing:
       app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_ID
+        api_key:   $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id:    $APP_STORE_CONNECT_KEY_ID
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-        submit_to_testflight: true
+        submit_to_testflight: true      # upload to TestFlight
+        # submit_to_app_store: true     # uncomment to push straight to App Store
