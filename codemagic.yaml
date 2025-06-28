@@ -24,13 +24,9 @@ workflows:
           pod install --repo-update
           cd ..
 
-      - name: Build signed IPA (automatic signing)
+      - name: Build signed IPA (signing handled by UI)
         script: flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/archive/*.xcarchive
-
-    # UI will handle App Store Connect publishing, so no publishing block here
-    code_signing:
-      apple_team: P4XSL5RZ3H        # your 10-char Team ID
