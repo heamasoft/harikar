@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0        # ✅ Works with your SDK and Codemagic
+  intl: any
   http: ^1.2.1
   shared_preferences: ^2.2.2
   mysql1: ^0.20.0
