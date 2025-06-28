@@ -33,7 +33,7 @@ workflows:
 
     publishing:
       app_store_connect:
-        api_key: Harikar   # This matches your Codemagic integration name
+        api_key: Harikar
         submit_to_app_store: true
         publish_on_failure: true
 
