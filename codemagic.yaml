@@ -1,10 +1,10 @@
-# ───────────── 1️⃣  CODE SIGNING  (top level) ─────────────
+# ───────────── Code Signing (Automatic) ─────────────
 code_signing:
   automatic:
     apple_team: P4XSL5RZ3H
-    bundle_identifier: com.example.legaryanKare   # ← matches Apple portal
+    bundle_identifier: com.example.legaryanKare
 
-# ───────────── 2️⃣  WORKFLOW  ────────────────────────────
+# ───────────── Workflows ─────────────
 workflows:
   ios-release:
     name: iOS Release
@@ -13,40 +13,35 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
+      cocoapods: default
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
 
     scripts:
-      # 1. Get Dart/Flutter deps
       - name: Install dependencies
         script: flutter pub get
 
-      # 2. Keep CocoaPods up-to-date
       - name: Install CocoaPods
         script: |
           cd ios
           pod install --repo-update
           cd ..
 
-      # 3. Auto-bump build number so every IPA is unique
-      - name: Bump build number
-        script: |
-          BUNDLE_NUMBER=$(date +%s)
-          echo "Bumping to $BUNDLE_NUMBER"
-          plutil -replace CFBundleVersion -string "$BUNDLE_NUMBER" ios/Runner/Info.plist
-
-      # 4. Build signed IPA (automatic signing)
-      - name: Build signed IPA
+      - name: Build signed IPA (automatic signing)
         script: flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/archive/*.xcarchive
 
-    # ─────── 3️⃣  PUBLISHING TO APP STORE CONNECT ─────────
     publishing:
       app_store_connect:
-        api_key_path: secure://appstore_key.p8   # ← upload .p8 in “Secure files”
-        issuer_id:  EEBB19ED-6FE5-4450-987E-AEF46513A68C
-        key_id:     P4XSL5RZ3H
-        bundle_id:  com.example.legaryanKare
-        submit_to_app_store: true        # upload straight to App Store
-        publish_on_failure: false        # optional
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_ID
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
