@@ -1,10 +1,10 @@
-# ───────────── 1️⃣  CODE SIGNING (top level) ─────────────
+# ───────────── 1️⃣  CODE SIGNING  (top level) ─────────────
 code_signing:
   automatic:
     apple_team: P4XSL5RZ3H
-    bundle_identifier: com.example.legaryanKare
+    bundle_identifier: com.example.legaryanKare   # ← matches Apple portal
 
-# ───────────── 2️⃣  WORKFLOW DEFINITION ─────────────────
+# ───────────── 2️⃣  WORKFLOW  ────────────────────────────
 workflows:
   ios-release:
     name: iOS Release
@@ -15,18 +15,38 @@ workflows:
       xcode: latest
 
     scripts:
+      # 1. Get Dart/Flutter deps
       - name: Install dependencies
         script: flutter pub get
 
+      # 2. Keep CocoaPods up-to-date
       - name: Install CocoaPods
         script: |
           cd ios
           pod install --repo-update
           cd ..
 
-      - name: Build signed IPA (automatic signing)
+      # 3. Auto-bump build number so every IPA is unique
+      - name: Bump build number
+        script: |
+          BUNDLE_NUMBER=$(date +%s)
+          echo "Bumping to $BUNDLE_NUMBER"
+          plutil -replace CFBundleVersion -string "$BUNDLE_NUMBER" ios/Runner/Info.plist
+
+      # 4. Build signed IPA (automatic signing)
+      - name: Build signed IPA
         script: flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/archive/*.xcarchive
+
+    # ─────── 3️⃣  PUBLISHING TO APP STORE CONNECT ─────────
+    publishing:
+      app_store_connect:
+        api_key_path: secure://appstore_key.p8   # ← upload .p8 in “Secure files”
+        issuer_id:  EEBB19ED-6FE5-4450-987E-AEF46513A68C
+        key_id:     P4XSL5RZ3H
+        bundle_id:  com.example.legaryanKare
+        submit_to_app_store: true        # upload straight to App Store
+        publish_on_failure: false        # optional
