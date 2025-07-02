@@ -1,14 +1,9 @@
-import 'package:Harikar/screens/AboutUsPage.dart';
-import 'package:Harikar/screens/AdsManagementPage.dart';
-import 'package:Harikar/screens/DetailsPage.dart';
-import 'package:Harikar/screens/InsertDetailsPage.dart';
-import 'package:Harikar/screens/UsersPage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'; // for kReleaseMode
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Import your other screens and models here
 import 'models/user_model.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
@@ -19,6 +14,11 @@ import 'screens/view_users_screen.dart';
 import 'screens/work_details_page.dart';
 import 'screens/register_screen.dart';
 import 'screens/forget_password_screen.dart';
+import 'screens/AboutUsPage.dart';
+import 'screens/AdsManagementPage.dart';
+import 'screens/DetailsPage.dart';
+import 'screens/InsertDetailsPage.dart';
+import 'screens/UsersPage.dart';
 
 /// A simple provider to manage the current locale.
 class LocaleProvider extends ChangeNotifier {
@@ -29,7 +29,6 @@ class LocaleProvider extends ChangeNotifier {
 
   void setLocale(Locale locale) async {
     _locale = locale;
-    // Persist the selected language in SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('language', locale.languageCode);
     notifyListeners();
@@ -38,7 +37,7 @@ class LocaleProvider extends ChangeNotifier {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Get saved language; default to Kurdish ('ku') if none exists
+
   final prefs = await SharedPreferences.getInstance();
   final savedLanguage = prefs.getString('language') ?? 'ku';
 
@@ -62,6 +61,7 @@ class LegaryanKare extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
+
     return MaterialApp(
       title: 'ليگريان كارێ',
       debugShowCheckedModeBanner: false,
@@ -69,17 +69,13 @@ class LegaryanKare extends StatelessWidget {
         fontFamily: 'NotoKufi',
         primarySwatch: Colors.deepPurple,
       ),
-      // Use the currently selected locale for your app’s UI strings.
       locale: localeProvider.locale,
       supportedLocales: [
-        Locale('ku', 'IQ'), // Kurdish (your custom strings)
-        Locale('ar', ''), // Arabic
+        Locale('ku', 'IQ'),
+        Locale('ar', ''),
       ],
-      // Fallback: if Kurdish is selected, use a supported locale (like English)
-      // for Material/Cupertino widgets.
       localeResolutionCallback: (locale, supportedLocales) {
         if (locale?.languageCode == 'ku') {
-          // Fallback to English for system widgets. Your custom texts remain Kurdish.
           return Locale('en', 'US');
         }
         return locale;
@@ -89,7 +85,7 @@ class LegaryanKare extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: SplashScreen(), // Always start with SplashScreen
+      home: SplashScreen(),
       routes: {
         '/login': (context) => LoginScreen(),
         '/dashboard': (context) => DashboardScreen(),
