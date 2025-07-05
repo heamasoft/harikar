@@ -45,10 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-
-	<!-- 🟡 Required by App Store due to image_picker or similar -->
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app uses your photo library to let you upload equipment and worker profile images.</string>
-
+	<key>MinimumOSVersion</key>
+	<string>12.0</string>
 </dict>
 </plist>
