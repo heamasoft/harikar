@@ -1,5 +1,6 @@
+import 'dart:async'; // ← for runZonedGuarded
+import 'package:flutter/foundation.dart'; // kReleaseMode & FlutterError
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // for kReleaseMode
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,7 +21,7 @@ import 'screens/DetailsPage.dart';
 import 'screens/InsertDetailsPage.dart';
 import 'screens/UsersPage.dart';
 
-/// A simple provider to manage the current locale.
+/// ───────────────── Locale provider ─────────────────
 class LocaleProvider extends ChangeNotifier {
   Locale _locale;
   LocaleProvider(this._locale);
@@ -35,29 +36,50 @@ class LocaleProvider extends ChangeNotifier {
   }
 }
 
+/// ───────────────────────── main() ─────────────────────────
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final prefs = await SharedPreferences.getInstance();
-  final savedLanguage = prefs.getString('language') ?? 'ku';
+  // Catch framework errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.dumpErrorToConsole(details); // shows in debug
+    if (kReleaseMode) {
+      // In release, at least print to console for CI logs
+      print('⚠️  FlutterError: ${details.exceptionAsString()}');
+      print(details.stack);
+    }
+  };
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => UserModel()..loadUserFromPreferences(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => LocaleProvider(
-              Locale(savedLanguage, savedLanguage == 'ku' ? 'IQ' : '')),
-        ),
-      ],
-      child: LegaryanKare(),
-    ),
-  );
+  // Catch any unhandled async errors (Dart side)
+  runZonedGuarded(() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedLanguage = prefs.getString('language') ?? 'ku';
+
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (_) => UserModel()..loadUserFromPreferences(),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => LocaleProvider(
+                Locale(savedLanguage, savedLanguage == 'ku' ? 'IQ' : '')),
+          ),
+        ],
+        child: const LegaryanKare(),
+      ),
+    );
+  }, (error, stack) {
+    // This prints in release, so the crash reason appears in device / Codemagic logs
+    print('⚠️  Uncaught Dart error: $error');
+    print(stack);
+  });
 }
 
+/// ──────────────────────── The App ────────────────────────
 class LegaryanKare extends StatelessWidget {
+  const LegaryanKare({super.key});
+
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
@@ -70,36 +92,37 @@ class LegaryanKare extends StatelessWidget {
         primarySwatch: Colors.deepPurple,
       ),
       locale: localeProvider.locale,
-      supportedLocales: [
+      supportedLocales: const [
         Locale('ku', 'IQ'),
         Locale('ar', ''),
       ],
       localeResolutionCallback: (locale, supportedLocales) {
         if (locale?.languageCode == 'ku') {
-          return Locale('en', 'US');
+          // Fallback widgets to English, custom strings stay Kurdish
+          return const Locale('en', 'US');
         }
         return locale;
       },
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       home: SplashScreen(),
       routes: {
-        '/login': (context) => LoginScreen(),
-        '/dashboard': (context) => DashboardScreen(),
-        '/add_category': (context) => AddCategoryScreen(),
-        '/add_subcategory': (context) => AddSubCategoryScreen(),
-        '/view_users': (context) => ViewUsersScreen(),
-        '/insert_details': (context) => InsertDetailsPage(),
-        '/show_details': (context) => DetailsPage(),
-        '/show_work': (context) => WorkDetailsPage(),
-        '/register': (context) => RegisterScreen(),
-        '/forget_password': (context) => ForgetPasswordScreen(),
-        '/about': (context) => AboutUsPage(),
-        '/user2': (context) => UsersPage(),
-        '/ads': (context) => AdsManagementPage(),
+        '/login': (_) => LoginScreen(),
+        '/dashboard': (_) => DashboardScreen(),
+        '/add_category': (_) => AddCategoryScreen(),
+        '/add_subcategory': (_) => AddSubCategoryScreen(),
+        '/view_users': (_) => ViewUsersScreen(),
+        '/insert_details': (_) => InsertDetailsPage(),
+        '/show_details': (_) => DetailsPage(),
+        '/show_work': (_) => WorkDetailsPage(),
+        '/register': (_) => RegisterScreen(),
+        '/forget_password': (_) => ForgetPasswordScreen(),
+        '/about': (_) => AboutUsPage(),
+        '/user2': (_) => UsersPage(),
+        '/ads': (_) => AdsManagementPage(),
       },
     );
   }
