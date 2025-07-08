@@ -1,20 +1,20 @@
-# ────────── 1. Automatic code-signing (top-level) ──────────
+# ────────────────────── 1️⃣  Automatic code-signing ──────────────────────
 code_signing:
   automatic:
-    apple_team: P4XSL5RZ3H
+    apple_team: P4XSL5RZ3H                 # your Dev-Team ID
     bundle_identifier: com.example.legaryanKare
 
-# ────────── 2. Workflows ───────────────────────────────────
+# ────────────────────── 2️⃣  Workflows ───────────────────────────────────
 workflows:
   ios-release:
     name: iOS Release
-    max_build_duration: 60
+    max_build_duration: 60                # minutes
 
     environment:
-      flutter: stable        # uses latest stable Flutter SDK
+      flutter: stable                     # latest stable SDK
       xcode:   latest
-      # these vars are picked up from the secure env-vars page
-      vars:
+      cocoapods: default                  # enable pod cache
+      vars:                               # secure env-vars (set on UI)
         APP_STORE_CONNECT_PRIVATE_KEY: Encrypted
         APP_STORE_CONNECT_KEY_ID:      Encrypted
         APP_STORE_CONNECT_ISSUER_ID:   Encrypted
@@ -27,6 +27,16 @@ workflows:
           include: true
 
     scripts:
+      # ─── auto-increment build number (CFBundleVersion) ───
+      - name: Bump pubspec build number
+        script: |
+          echo "Incrementing build number…"
+          CURRENT=$(grep -E '^version:' pubspec.yaml | sed -E 's/.*\+([0-9]+)/\1/')
+          NEXT=$((CURRENT+1))
+          # replace +number with +NEXT
+          sed -i.bak -E "s/\+[0-9]+$/+$NEXT/" pubspec.yaml
+          echo "New version line: $(grep -E '^version:' pubspec.yaml)"
+
       - name: Get Flutter packages
         script: flutter pub get
 
@@ -42,11 +52,12 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/archive/*.xcarchive
+      - pubspec.yaml                    # so you can verify bumped version
 
     publishing:
       app_store_connect:
         api_key:   $APP_STORE_CONNECT_PRIVATE_KEY
         key_id:    $APP_STORE_CONNECT_KEY_ID
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-        submit_to_testflight: true      # upload to TestFlight
-        # submit_to_app_store: true     # uncomment to push straight to App Store
+        submit_to_testflight: true      # → TestFlight
+        # submit_to_app_store: true     # ← uncomment to auto-submit to App Store
