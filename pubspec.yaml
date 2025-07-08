@@ -2,7 +2,7 @@ name: Harikar
 description: "A new Flutter project for looking for work."
 publish_to: "none"
 
-version: 1.0.9+15          # bump build number
+version: 1.0.10+16         # bump build number
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -20,17 +20,17 @@ dependencies:
   provider: ^6.1.2
   cupertino_icons: ^1.0.8
   image_picker: ^1.0.7
-  blur: ^3.0.0
+  blur: ^4.0.2
   cached_network_image: ^3.3.0
   url_launcher: ^6.1.7
   font_awesome_flutter: ^10.7.0
-  photo_view: ^0.14.0
-  dropdown_search: ^5.0.2
+  photo_view: ^0.15.0
+  dropdown_search: ^6.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
