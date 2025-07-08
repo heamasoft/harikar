@@ -1,20 +1,39 @@
-# ────────────────────── 1️⃣  Automatic code-signing ──────────────────────
+# ────────────────────── CODESIGNING SETUP ──────────────────────
 code_signing:
   automatic:
-    apple_team: P4XSL5RZ3H                 # your Dev-Team ID
-    bundle_identifier: com.example.legaryanKare
+    apple_team: P4XSL5RZ3H              # ← your Apple Dev Team ID
+    bundle_identifier: com.heamasoft.harikar  # ← update to your real bundle ID
 
-# ────────────────────── 2️⃣  Workflows ───────────────────────────────────
+# ────────────────────── WORKFLOWS ────────────────────────────
 workflows:
+
+  # ───────────── 1️⃣ Simulator smoke-test ─────────────
+  test-ios-simulator:
+    name: Test iOS (Simulator)
+    environment:
+      flutter: stable
+
+    scripts:
+      - name: Get dependencies
+        script: flutter pub get
+
+      - name: Build for iOS simulator
+        script: flutter build ios --simulator --no-codesign
+
+    artifact_paths:
+      - build/ios/iphonesimulator/Runner.app
+
+  # ───────────── 2️⃣ iOS Release (signed) ─────────────
   ios-release:
     name: iOS Release
-    max_build_duration: 60                # minutes
-
+    max_build_duration: 60
     environment:
-      flutter: stable                     # latest stable SDK
-      xcode:   latest
-      cocoapods: default                  # enable pod cache
-      vars:                               # secure env-vars (set on UI)
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+
+      # these must be set in the Codemagic UI as secure vars
+      vars:
         APP_STORE_CONNECT_PRIVATE_KEY: Encrypted
         APP_STORE_CONNECT_KEY_ID:      Encrypted
         APP_STORE_CONNECT_ISSUER_ID:   Encrypted
@@ -27,13 +46,11 @@ workflows:
           include: true
 
     scripts:
-      # ─── auto-increment build number (CFBundleVersion) ───
       - name: Bump pubspec build number
         script: |
           echo "Incrementing build number…"
           CURRENT=$(grep -E '^version:' pubspec.yaml | sed -E 's/.*\+([0-9]+)/\1/')
           NEXT=$((CURRENT+1))
-          # replace +number with +NEXT
           sed -i.bak -E "s/\+[0-9]+$/+$NEXT/" pubspec.yaml
           echo "New version line: $(grep -E '^version:' pubspec.yaml)"
 
@@ -46,18 +63,18 @@ workflows:
           pod install --repo-update
           cd ..
 
-      - name: Build signed IPA (automatic signing)
+      - name: Build signed IPA
         script: flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/archive/*.xcarchive
-      - pubspec.yaml                    # so you can verify bumped version
+      - pubspec.yaml
 
     publishing:
       app_store_connect:
         api_key:   $APP_STORE_CONNECT_PRIVATE_KEY
         key_id:    $APP_STORE_CONNECT_KEY_ID
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-        submit_to_testflight: true      # → TestFlight
-        # submit_to_app_store: true     # ← uncomment to auto-submit to App Store
+        submit_to_testflight: true
+        # submit_to_app_store: true
