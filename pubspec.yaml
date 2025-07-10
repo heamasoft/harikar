@@ -1,8 +1,10 @@
+# pubspec.yaml
+
 name: Harikar
 description: "A new Flutter project for looking for work."
 publish_to: "none"
 
-version: 1.0.10+19        # bump build number
+version: 1.0.10+20        # bump build number
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -12,7 +14,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  path_provider: ^2.1.2     # ← crash-fixed version
+  path_provider: ^2.1.2
   intl: any
   http: ^1.2.1
   shared_preferences: ^2.2.2
@@ -29,6 +31,8 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   flutter_lints: ^5.0.0
 
