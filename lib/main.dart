@@ -1,181 +1,122 @@
-// lib/main.dart
-
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // for kReleaseMode
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'models/user_model.dart';
-import 'screens/splash_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/add_category_screen.dart';
-import 'screens/add_subcategory_screen.dart';
-import 'screens/view_users_screen.dart';
-import 'screens/work_details_page.dart';
-import 'screens/register_screen.dart';
-import 'screens/forget_password_screen.dart';
-import 'screens/AboutUsPage.dart';
-import 'screens/AdsManagementPage.dart';
-import 'screens/DetailsPage.dart';
-import 'screens/InsertDetailsPage.dart';
-import 'screens/UsersPage.dart';
-
-/// A global key so we can show dialogs without needing a BuildContext.
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Load any saved error from the previous run
-  final prefs = await SharedPreferences.getInstance();
-  final String? lastError = prefs.getString('last_error');
-  if (lastError != null) {
-    await prefs.remove('last_error');
-  }
-
-  // Catch Flutter framework errors
-  FlutterError.onError = (FlutterErrorDetails details) async {
-    FlutterError.presentError(details);
-    if (kReleaseMode) {
-      await prefs.setString('last_error', details.exceptionAsString());
-    }
-  };
-
-  // Catch all other unhandled errors
-  runZonedGuarded(
-    () {
-      runApp(AppRoot(initialError: lastError));
-    },
-    (error, stack) async {
-      if (kReleaseMode) {
-        await prefs.setString('last_error', error.toString());
-      }
-    },
-  );
+void main() {
+  runApp(const MyApp());
 }
 
-/// Wraps the app in all the providers, including our LocaleProvider.
-class AppRoot extends StatelessWidget {
-  final String? initialError;
-  const AppRoot({this.initialError, Key? key}) : super(key: key);
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => UserModel()..loadUserFromPreferences(),
-        ),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
-      ],
-      child: ErrorHandler(initialError: initialError, child: HarikarApp()),
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // TRY THIS: Try running your application with "flutter run". You'll see
+        // the application has a purple toolbar. Then, without quitting the app,
+        // try changing the seedColor in the colorScheme below to Colors.green
+        // and then invoke "hot reload" (save your changes or press the "hot
+        // reload" button in a Flutter-supported IDE, or press "r" if you used
+        // the command line to start the app).
+        //
+        // Notice that the counter didn't reset back to zero; the application
+        // state is not lost during the reload. To reset the state, use hot
+        // restart instead.
+        //
+        // This works for code too, not just values: Most code changes can be
+        // tested with just a hot reload.
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-/// Shows an error dialog if we saved one on the last run.
-class ErrorHandler extends StatefulWidget {
-  final String? initialError;
-  final Widget child;
-  const ErrorHandler({
-    required this.initialError,
-    required this.child,
-    Key? key,
-  }) : super(key: key);
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+
+  final String title;
 
   @override
-  _ErrorHandlerState createState() => _ErrorHandlerState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _ErrorHandlerState extends State<ErrorHandler> {
-  @override
-  void initState() {
-    super.initState();
-    if (widget.initialError != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showDialog(
-          context: navigatorKey.currentState!.overlay!.context,
-          builder: (_) => AlertDialog(
-            title: const Text('Unexpected Error'),
-            content: SingleChildScrollView(child: Text(widget.initialError!)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-      });
-    }
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
+      _counter++;
+    });
   }
 
-  @override
-  Widget build(BuildContext context) => widget.child;
-}
-
-/// Holds the current locale and persists it across restarts.
-class LocaleProvider extends ChangeNotifier {
-  Locale _locale;
-  LocaleProvider([String code = 'ku'])
-    : _locale = Locale(code, code == 'ku' ? 'IQ' : '');
-
-  Locale get locale => _locale;
-
-  Future<void> setLocale(Locale locale) async {
-    _locale = locale;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('language', locale.languageCode);
-    notifyListeners();
-  }
-}
-
-/// The root widget of your app.
-class HarikarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocaleProvider>(context);
-
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      title: 'ليگريان كارێ',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'NotoKufi',
-        primarySwatch: Colors.deepPurple,
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
+    return Scaffold(
+      appBar: AppBar(
+        // TRY THIS: Try changing the color here to a specific color (to
+        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
+        // change color while the other colors stay the same.
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(widget.title),
       ),
-      locale: localeProvider.locale,
-      supportedLocales: const [Locale('ku', 'IQ'), Locale('ar', '')],
-      localeResolutionCallback: (locale, supportedLocales) {
-        if (locale?.languageCode == 'ku') {
-          return const Locale('ku', 'IQ');
-        }
-        return locale;
-      },
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: SplashScreen(),
-      routes: {
-        '/login': (_) => LoginScreen(),
-        '/dashboard': (_) => DashboardScreen(),
-        '/add_category': (_) => AddCategoryScreen(),
-        '/add_subcategory': (_) => AddSubCategoryScreen(),
-        '/view_users': (_) => ViewUsersScreen(),
-        '/show_work': (_) => WorkDetailsPage(),
-        '/register': (_) => RegisterScreen(),
-        '/forget_password': (_) => ForgetPasswordScreen(),
-        '/show_details': (_) => DetailsPage(),
-        '/insert_details': (_) => InsertDetailsPage(),
-        '/user2': (_) => UsersPage(),
-        '/ads': (_) => AdsManagementPage(),
-        '/about': (_) => AboutUsPage(),
-      },
+      body: Center(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+        child: Column(
+          // Column is also a layout widget. It takes a list of children and
+          // arranges them vertically. By default, it sizes itself to fit its
+          // children horizontally, and tries to be as tall as its parent.
+          //
+          // Column has various properties to control how it sizes itself and
+          // how it positions its children. Here we use mainAxisAlignment to
+          // center the children vertically; the main axis here is the vertical
+          // axis because Columns are vertical (the cross axis would be
+          // horizontal).
+          //
+          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
+          // action in the IDE, or press "p" in the console), to see the
+          // wireframe for each widget.
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('You have pushed the button this many times:'),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
