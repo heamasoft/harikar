@@ -4,54 +4,40 @@ platform :ios, '12.0'
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
-  'Debug' => :debug,
+  'Debug'   => :debug,
   'Profile' => :release,
   'Release' => :release,
 }
 
-# Prepare symlinks and verify Flutter-generated xcconfig is present
+# Locate the Generated.xcconfig so Flutter can find its engine artifacts.
 def flutter_root
   generated_xcode_build_settings_path = File.expand_path(
     File.join('..', 'Flutter', 'Generated.xcconfig'),
-    __FILE__
+    __FILE__,
   )
   unless File.exist?(generated_xcode_build_settings_path)
-    raise <<~ERROR
-      #{generated_xcode_build_settings_path} must exist.
-      If you're running pod install manually, make sure `flutter pub get` has been run.
-    ERROR
+    raise "#{generated_xcode_build_settings_path} must exist. Run 'flutter pub get' first."
   end
-  File.expand_path(
-    File.join('..', 'flutter', 'bin', 'cache', 'artifacts', 'engine', 'ios'),
-    __FILE__
-  )
+  File.expand_path(File.join('..', 'flutter', 'bin', 'cache', 'artifacts', 'engine', 'ios'), __FILE__)
 end
 
-# Load the Flutter CocoaPods helper, which defines flutter_install_all_ios_pods
+# Load Flutter’s CocoaPods helper, which defines flutter_install_all_ios_pods
 load File.join(File.dirname(__FILE__), 'Flutter', 'podhelper.rb')
 
 target 'Runner' do
-  use_frameworks!
-  use_modular_headers!
+  # ← remove use_frameworks! and use_modular_headers! here
 
-  # Install Flutter pods (including path_provider_foundation, etc.)
+  # Install all Flutter pods (including sqflite, path_provider, etc.)
   flutter_install_all_ios_pods(File.dirname(File.realpath(__FILE__)))
 
   # If you have unit tests:
   target 'RunnerTests' do
     inherit! :search_paths
-    # Pods for testing can go here
   end
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    if target.name == 'Runner'
-      target.build_configurations.each do |config|
-        # Force embedding the Swift standard libraries
-        config.build_settings['EMBEDDED_CONTENT_CONTAINS_SWIFT_CODE']     = 'YES'
-        config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES']    = 'YES'
-      end
-    end
+    flutter_additional_ios_build_settings(target)
   end
 end
