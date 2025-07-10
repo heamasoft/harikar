@@ -4,7 +4,7 @@
 code_signing:
   automatic:
     apple_team: P4XSL5RZ3H
-    bundle_identifier: com.example.legaryan_kare
+    bundle_identifier: com.example.legaryanKare
 
 # ────────────────────── WORKFLOWS ────────────────────────────
 workflows:
