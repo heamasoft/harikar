@@ -4,7 +4,7 @@ name: Harikar
 description: "A new Flutter project for looking for work."
 publish_to: "none"
 
-version: 1.0.10+21        # bump build number
+version: 1.0.10+22       # bump build number
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
