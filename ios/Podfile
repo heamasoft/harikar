@@ -1,19 +1,50 @@
+# ios/Podfile
+
 platform :ios, '12.0'
-use_frameworks!
-use_modular_headers!
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+# CocoaPods analytics sends network stats. Uncomment to opt-out.
+# ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+# Prepare symlinks and load Flutter’s pod helper
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  end
+  File.expand_path(File.join('..', 'flutter', 'bin', 'cache', 'artifacts', 'engine', 'ios'), __FILE__)
+end
+
+# This loads the flutter_install_all_ios_pods method
+load File.join(File.dirname(__FILE__), 'Flutter', 'podhelper.rb')
 
 target 'Runner' do
-  # Flutter’s own iOS pods
-  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  use_frameworks!
+  use_modular_headers!
+
+  # Install all Flutter pods (including path_provider_foundation, etc.)
+  flutter_install_all_ios_pods(File.dirname(File.realpath(__FILE__)))
+
+  # If you have unit tests:
+  target 'RunnerTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     if target.name == 'Runner'
       target.build_configurations.each do |config|
-        # force Xcode to embed Swift stdlibs
-        config.build_settings['EMBEDDED_CONTENT_CONTAINS_SWIFT_CODE']     = 'YES'
-        config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES']    = 'YES'
+        # Force embedding the Swift standard libraries
+        config.build_settings['EMBEDDED_CONTENT_CONTAINS_SWIFT_CODE']  = 'YES'
+        config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
       end
     end
   end
