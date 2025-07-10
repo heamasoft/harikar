@@ -1,10 +1,8 @@
-# pubspec.yaml
-
 name: harikar
 description: "A new Flutter project for looking for work."
 publish_to: "none"
 
-version: 1.0.10+23       # bump build number
+version: 1.0.10+19        # bump build number
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -34,7 +32,7 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

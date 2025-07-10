@@ -6,9 +6,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:harikar/screens/form_search_work.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:Harikar/screens/form_search_work.dart';
 import '../widgets/custom_drawer.dart';
 import 'AboutUsPage.dart';
 import 'WorkDetailsScreen.dart';

@@ -1,5 +1,5 @@
-import 'package:Harikar/screens/dashboard_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:harikar/screens/dashboard_screen.dart';
 import 'package:provider/provider.dart'; // Import Provider
 
 import '../widgets/custom_drawer.dart'; // Import CustomDrawer

@@ -21,34 +21,20 @@ import 'screens/DetailsPage.dart';
 import 'screens/InsertDetailsPage.dart';
 import 'screens/UsersPage.dart';
 
-/// Global navigator key to show dialogs without explicit BuildContext
+/// A global key so we can show dialogs (for errors) without needing a BuildContext.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-class LocaleProvider extends ChangeNotifier {
-  Locale _locale;
-  LocaleProvider(this._locale);
-
-  Locale get locale => _locale;
-
-  void setLocale(Locale locale) async {
-    _locale = locale;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('language', locale.languageCode);
-    notifyListeners();
-  }
-}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load and clear any saved error from previous run
+  // Load any saved error from the previous run
   final prefs = await SharedPreferences.getInstance();
   final String? lastError = prefs.getString('last_error');
   if (lastError != null) {
     await prefs.remove('last_error');
   }
 
-  // Capture Flutter framework errors
+  // Catch Flutter framework errors
   FlutterError.onError = (FlutterErrorDetails details) async {
     FlutterError.presentError(details);
     if (kReleaseMode) {
@@ -56,44 +42,55 @@ Future<void> main() async {
     }
   };
 
-  // Run the app inside a guarded zone to catch async errors
-  runZonedGuarded(() async {
-    final savedLanguage = prefs.getString('language') ?? 'ku';
-
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(
-            create: (_) => UserModel()..loadUserFromPreferences(),
-          ),
-          ChangeNotifierProvider(
-            create: (_) => LocaleProvider(
-              Locale(
-                savedLanguage,
-                savedLanguage == 'ku' ? 'IQ' : '',
-              ),
-            ),
-          ),
-        ],
-        child: LegaryanKare(initialError: lastError),
-      ),
-    );
-  }, (Object error, StackTrace stack) async {
+  // Catch all other unhandled errors
+  runZonedGuarded(() {
+    runApp(AppRoot(initialError: lastError));
+  }, (error, stack) async {
     if (kReleaseMode) {
       await prefs.setString('last_error', error.toString());
     }
   });
 }
 
-class LegaryanKare extends StatefulWidget {
+/// Wraps the app in all the providers, including our LocaleProvider.
+class AppRoot extends StatelessWidget {
   final String? initialError;
-  const LegaryanKare({this.initialError, Key? key}) : super(key: key);
+  const AppRoot({this.initialError, Key? key}) : super(key: key);
 
   @override
-  _LegaryanKareState createState() => _LegaryanKareState();
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => UserModel()..loadUserFromPreferences(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => LocaleProvider(),
+        ),
+      ],
+      child: ErrorHandler(
+        initialError: initialError,
+        child: HarikarApp(),
+      ),
+    );
+  }
 }
 
-class _LegaryanKareState extends State<LegaryanKare> {
+/// Shows an error dialog if we saved one on the last run.
+class ErrorHandler extends StatefulWidget {
+  final String? initialError;
+  final Widget child;
+  const ErrorHandler({
+    required this.initialError,
+    required this.child,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  _ErrorHandlerState createState() => _ErrorHandlerState();
+}
+
+class _ErrorHandlerState extends State<ErrorHandler> {
   @override
   void initState() {
     super.initState();
@@ -101,15 +98,15 @@ class _LegaryanKareState extends State<LegaryanKare> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showDialog(
           context: navigatorKey.currentState!.overlay!.context,
-          builder: (context) => AlertDialog(
-            title: const Text('Unexpected Error'),
+          builder: (_) => AlertDialog(
+            title: Text('Unexpected Error'),
             content: SingleChildScrollView(
               child: Text(widget.initialError!),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
+                child: Text('OK'),
               ),
             ],
           ),
@@ -118,6 +115,28 @@ class _LegaryanKareState extends State<LegaryanKare> {
     }
   }
 
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// Holds the current locale and persists it across restarts.
+class LocaleProvider extends ChangeNotifier {
+  Locale _locale;
+  LocaleProvider([String code = 'ku'])
+      : _locale = Locale(code, code == 'ku' ? 'IQ' : '');
+
+  Locale get locale => _locale;
+
+  Future<void> setLocale(Locale locale) async {
+    _locale = locale;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('language', locale.languageCode);
+    notifyListeners();
+  }
+}
+
+/// The root widget of your app.
+class HarikarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
@@ -136,8 +155,9 @@ class _LegaryanKareState extends State<LegaryanKare> {
         Locale('ar', ''),
       ],
       localeResolutionCallback: (locale, supportedLocales) {
+        // Fallback logic if needed
         if (locale?.languageCode == 'ku') {
-          return const Locale('en', 'US');
+          return const Locale('ku', 'IQ');
         }
         return locale;
       },
@@ -153,14 +173,14 @@ class _LegaryanKareState extends State<LegaryanKare> {
         '/add_category': (_) => AddCategoryScreen(),
         '/add_subcategory': (_) => AddSubCategoryScreen(),
         '/view_users': (_) => ViewUsersScreen(),
-        '/insert_details': (_) => InsertDetailsPage(),
-        '/show_details': (_) => DetailsPage(),
         '/show_work': (_) => WorkDetailsPage(),
         '/register': (_) => RegisterScreen(),
         '/forget_password': (_) => ForgetPasswordScreen(),
-        '/about': (_) => AboutUsPage(),
+        '/show_details': (_) => DetailsPage(),
+        '/insert_details': (_) => InsertDetailsPage(),
         '/user2': (_) => UsersPage(),
         '/ads': (_) => AdsManagementPage(),
+        '/about': (_) => AboutUsPage(),
       },
     );
   }

@@ -1,23 +1,30 @@
-import 'package:Harikar/main.dart';
-import 'package:Harikar/screens/splash_screen.dart';
+// This is a basic Flutter widget test.
+//
+// To perform an interaction with a widget in your test, use the WidgetTester
+// utility in the flutter_test package. For example, you can send tap and scroll
+// gestures. You can also use WidgetTester to find child widgets in the widget
+// tree, read text, and verify that the values of widget properties are correct.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  // 1️⃣ Smoke-test that the app can build your root widget
-  testWidgets('AppRoot builds without errors', (WidgetTester tester) async {
-    await tester.pumpWidget(const LegaryanKare());
-    // Allow any animations/splash to settle
-    await tester.pumpAndSettle();
-    // Verify we have a MaterialApp somewhere in the tree
-    expect(find.byType(MaterialApp), findsOneWidget);
-  });
+import 'package:harikar/main.dart';
 
-  // 2️⃣ Example: check that your splash screen shows something
-  testWidgets('SplashScreen shows welcome text', (WidgetTester tester) async {
-    await tester.pumpWidget(SplashScreen());
-    await tester.pumpAndSettle();
-    // Adjust this to whatever text or widget your splash shows:
-    expect(find.text('Welcome!'), findsOneWidget);
+void main() {
+  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MyApp());
+
+    // Verify that our counter starts at 0.
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+
+    // Tap the '+' icon and trigger a frame.
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    // Verify that our counter has incremented.
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
   });
 }
