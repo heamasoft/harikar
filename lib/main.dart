@@ -1,3 +1,5 @@
+// lib/main.dart
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'; // for kReleaseMode
@@ -21,7 +23,7 @@ import 'screens/DetailsPage.dart';
 import 'screens/InsertDetailsPage.dart';
 import 'screens/UsersPage.dart';
 
-/// A global key so we can show dialogs (for errors) without needing a BuildContext.
+/// A global key so we can show dialogs without needing a BuildContext.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
@@ -99,14 +101,14 @@ class _ErrorHandlerState extends State<ErrorHandler> {
         showDialog(
           context: navigatorKey.currentState!.overlay!.context,
           builder: (_) => AlertDialog(
-            title: Text('Unexpected Error'),
+            title: const Text('Unexpected Error'),
             content: SingleChildScrollView(
               child: Text(widget.initialError!),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text('OK'),
+                child: const Text('OK'),
               ),
             ],
           ),
@@ -155,7 +157,6 @@ class HarikarApp extends StatelessWidget {
         Locale('ar', ''),
       ],
       localeResolutionCallback: (locale, supportedLocales) {
-        // Fallback logic if needed
         if (locale?.languageCode == 'ku') {
           return const Locale('ku', 'IQ');
         }

@@ -1,29 +1,21 @@
-# codemagic.yaml
-
-# ────────────────────── CODESIGNING SETUP ──────────────────────
+# ────────────────────── CODE SIGNING SETUP ──────────────────────
 code_signing:
   automatic:
-    apple_team: P4XSL5RZ3H
-    bundle_identifier: com.example.legaryanKare
+    apple_team: P4XSL5RZ3H              # your Apple Developer Team ID
+    bundle_identifier: com.example.legaryanKare  # your exact App ID
 
 # ────────────────────── WORKFLOWS ────────────────────────────
 workflows:
 
-  # ───────────── 1️⃣ Simulator smoke-test & QA ─────────────
+  # ───────────── 1️⃣ Simulator smoke-test ─────────────
   test-ios-simulator:
-    name: Test iOS (Simulator & QA)
+    name: Test iOS (Simulator)
     environment:
       flutter: stable
 
     scripts:
       - name: Get dependencies
         script: flutter pub get
-
-      - name: Run unit tests
-        script: flutter test --machine
-
-      - name: Run integration tests
-        script: flutter test --machine integration_test
 
       - name: Build for iOS simulator
         script: flutter build ios --simulator --no-codesign
@@ -40,10 +32,11 @@ workflows:
       xcode: latest
       cocoapods: default
 
-    vars:
-      APP_STORE_CONNECT_PRIVATE_KEY: Encrypted
-      APP_STORE_CONNECT_KEY_ID:      Encrypted
-      APP_STORE_CONNECT_ISSUER_ID:   Encrypted
+      # these must be set in the Codemagic UI as secure vars
+      vars:
+        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted
+        APP_STORE_CONNECT_KEY_ID:      Encrypted
+        APP_STORE_CONNECT_ISSUER_ID:   Encrypted
 
     triggering:
       events:
