@@ -45,13 +45,16 @@ Future<void> main() async {
   };
 
   // Catch all other unhandled errors
-  runZonedGuarded(() {
-    runApp(AppRoot(initialError: lastError));
-  }, (error, stack) async {
-    if (kReleaseMode) {
-      await prefs.setString('last_error', error.toString());
-    }
-  });
+  runZonedGuarded(
+    () {
+      runApp(AppRoot(initialError: lastError));
+    },
+    (error, stack) async {
+      if (kReleaseMode) {
+        await prefs.setString('last_error', error.toString());
+      }
+    },
+  );
 }
 
 /// Wraps the app in all the providers, including our LocaleProvider.
@@ -66,14 +69,9 @@ class AppRoot extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => UserModel()..loadUserFromPreferences(),
         ),
-        ChangeNotifierProvider(
-          create: (_) => LocaleProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ],
-      child: ErrorHandler(
-        initialError: initialError,
-        child: HarikarApp(),
-      ),
+      child: ErrorHandler(initialError: initialError, child: HarikarApp()),
     );
   }
 }
@@ -102,9 +100,7 @@ class _ErrorHandlerState extends State<ErrorHandler> {
           context: navigatorKey.currentState!.overlay!.context,
           builder: (_) => AlertDialog(
             title: const Text('Unexpected Error'),
-            content: SingleChildScrollView(
-              child: Text(widget.initialError!),
-            ),
+            content: SingleChildScrollView(child: Text(widget.initialError!)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -125,7 +121,7 @@ class _ErrorHandlerState extends State<ErrorHandler> {
 class LocaleProvider extends ChangeNotifier {
   Locale _locale;
   LocaleProvider([String code = 'ku'])
-      : _locale = Locale(code, code == 'ku' ? 'IQ' : '');
+    : _locale = Locale(code, code == 'ku' ? 'IQ' : '');
 
   Locale get locale => _locale;
 
@@ -152,10 +148,7 @@ class HarikarApp extends StatelessWidget {
         primarySwatch: Colors.deepPurple,
       ),
       locale: localeProvider.locale,
-      supportedLocales: const [
-        Locale('ku', 'IQ'),
-        Locale('ar', ''),
-      ],
+      supportedLocales: const [Locale('ku', 'IQ'), Locale('ar', '')],
       localeResolutionCallback: (locale, supportedLocales) {
         if (locale?.languageCode == 'ku') {
           return const Locale('ku', 'IQ');

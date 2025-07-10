@@ -1,8 +1,10 @@
-# ────────────────────── CODE SIGNING SETUP ──────────────────────
+# codemagic.yaml
+
+# ────────────────────── CODESIGNING SETUP ──────────────────────
 code_signing:
   automatic:
-    apple_team: P4XSL5RZ3H              # your Apple Developer Team ID
-    bundle_identifier: com.example.legaryanKare  # your exact App ID
+    apple_team: 59JQEF7QYP
+    bundle_identifier: com.example.legaryanKare
 
 # ────────────────────── WORKFLOWS ────────────────────────────
 workflows:
